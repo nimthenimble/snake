@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            overflow: hidden;
+        }
+        canvas {
+            background-color: #fff;
+            border: 2px solid black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const image = new Image();
+        image.src = "assets/player.png";
+        
+        const appleImage = new Image();
+        appleImage.src = "https://static.vecteezy.com/system/resources/previews/016/326/825/non_2x/3d-dental-teeth-isolated-on-transparent-background-free-png.png";
+        
+        let speed = 20;
+        let snake = [{ x: 200, y: 200 }];
+        let apple = { x: Math.floor(Math.random() * (canvas.width - 75)), y: Math.floor(Math.random() * (canvas.height - 75)) };
+        let direction = "right";
+        
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw snake segments
+            snake.forEach(segment => ctx.drawImage(image, segment.x, segment.y, 150, 150));
+            
+            // Draw apple
+            ctx.drawImage(appleImage, apple.x, apple.y, 90, 90);
+        }
+        
+        function move() {
+            let head = { ...snake[0] };
+            
+            if (direction === "left" && head.x > 0) head.x -= speed;
+            if (direction === "up" && head.y > 0) head.y -= speed;
+            if (direction === "right" && head.x < canvas.width - 75) head.x += speed;
+            if (direction === "down" && head.y < canvas.height - 75) head.y += speed;
+            
+            // Check for collision with apple
+            if (
+                head.x < apple.x + 45 &&
+                head.x + 75 > apple.x &&
+                head.y < apple.y + 45 &&
+                head.y + 75 > apple.y
+            ) {
+                apple.x = Math.floor(Math.random() * (canvas.width - 75));
+                apple.y = Math.floor(Math.random() * (canvas.height - 75));
+                snake.push({ ...snake[snake.length - 1] }); // Add new segment
+            }
+            
+            // Move snake
+            snake.pop();
+            snake.unshift(head);
+            draw();
+        }
+        
+        function changeDirection(event) {
+            if (event.keyCode === 37 && direction !== "right") direction = "left";
+            if (event.keyCode === 38 && direction !== "down") direction = "up";
+            if (event.keyCode === 39 && direction !== "left") direction = "right";
+            if (event.keyCode === 40 && direction !== "up") direction = "down";
+        }
+        
+        document.addEventListener("keydown", changeDirection);
+        setInterval(move, 150); // Auto move every 150ms
+        
+        image.onload = draw;
+        appleImage.onload = draw;
+    </script>
+</body>
+</html>
